@@ -49,60 +49,27 @@ N List of possible number of neighbours
 P The probability distribution of the order parameter
 """ ADD CODE HERE
 return N, P
-def swapInfo(ixa, iya, dab, nBox, config, Ematrix):
-"""
-SWAPINFO Returns the position of the neighbour and the energy change following a swap
-Input arguments
-ixa X coordinate of first atom
-iya Y coordinate of first atom
-dab Direction of second atom relative to first. There are four
-possible directions, so this takes values between 1 and
-4. Together with ixa and ixb, this allows the position
-of the second atom to be computed. This calculation is
-done by getNeighbour
-config The configuration of alloy atoms
-nBox System size
-Ematrix The 2x2 matrix of bond energies
-Output arguments
-ixb X coordinate of second atom
-iyb Y coordinate of second atom
-dE Energy change following swap
-""" ADD CODE HERE
-return ixb, iyb, dE
-def getNeighbour (nBox, ix1, iy1, d12):
-"""
-GETNEIGHBOUR returns the position of a neighbouring atom
-Input arguments
-nBox The size of the simulation box
-ix1 X coordinate of first atom
-iy1 Y coordinate of first atom
-d12 Direction of second atom relative to first
-Output arguments
-ix2 X coordinate of second atom
-iy2 Y coordinate of second atom
-""" ADD CODE HERE
-#
-# Return the new coordinates
-return ix2, iy2
+
+
 def alloy2D(nBox, fAlloy, nSweeps, nEquil, T, Eam, job):
-"""
-ALLOY2D Performs Metropolis Monte Carlo of a lattice gas model of an alloy
-A random alloy is represented as a 2 dimensional lattice gas in which
-alloying atoms can exchange position with matrix atoms using the
-Metropolis alogorithm. The purpose is to show how alloys become more
-random as the temperature increases.
-Input arguments
-nBox The size of the 2-D grid
-fAlloy The fraction of sites occupied by alloying atoms
-nSweeps The total number of Monte Carlo moves
-nEquil The number of Monte Carlo moves used to equilibrate the system
-T The temperature (K)
-Eam Alloy-matrix interaction energy (eV)
-job Name or number given to this simulation. Useful for creating file names
-Output arguments
-nBar The average number of unlike neighbours
-Ebar The average energy
-C The heat capacity
+    """
+    ALLOY2D Performs Metropolis Monte Carlo of a lattice gas model of an alloy
+    A random alloy is represented as a 2 dimensional lattice gas in which
+    alloying atoms can exchange position with matrix atoms using the
+    Metropolis alogorithm. The purpose is to show how alloys become more
+    random as the temperature increases.
+    Input arguments
+    nBox The size of the 2-D grid
+    fAlloy The fraction of sites occupied by alloying atoms
+    nSweeps The total number of Monte Carlo moves
+    nEquil The number of Monte Carlo moves used to equilibrate the system
+    T The temperature (K)
+    Eam Alloy-matrix interaction energy (eV)
+    job Name or number given to this simulation. Useful for creating file names
+    Output arguments
+    nBar The average number of unlike neighbours
+    Ebar The average energy
+    C The heat capacity
 """ ADD CODE HERE
 #
 # Plot the configuration

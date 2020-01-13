@@ -1,4 +1,5 @@
 import numpy as np
+from set_up import set_up
 
 
 def main():
