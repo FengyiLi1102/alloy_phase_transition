@@ -28,17 +28,33 @@ def getNeighbour (size, ix1, iy1, d12):
     return ix2, iy2
 
 
-def periodic_check(x, y, size):
+def periodic_change(x, y, size):
     """
+    Description:
+    Change the position of the atom that runs out of the boundary.
 
+    Positional arguments:
+    -> x:                      X coordinate of second atom                          int
+    -> y:                      Y coordinate of second atom                          int
+    -> size:                   Dimension of the matrix                              int
+
+    Return:
+    -> x:                      Changed X coordinate                                 int
+    -> y:                      Changed Y coordinate                                 int
     """
-
-    if x > (size - 1):
-        x = 0
+    # Check whether the X and Y coordinates out of the matrix dimension
+    if x > (size - 1):      # Larger than the upper bound
+        x = 0               # Change to the lower bound
     
-    else x < 0:
+    elif x < 0:
         x = size - 1
     
-    if y > 
+    if y > (size - 1):
+        y = 0
+    
+    elif y < 0:
+        y = size - 1
+
+    return x, y
 
         
