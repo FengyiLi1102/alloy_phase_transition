@@ -1,18 +1,41 @@
 import numpy as np
 from set_up import set_up
+import pandas as pd
+
+
+#######################################################################################
+#                                  GLOBAL VALUES                                      #
+#######################################################################################
+cellA = 0 # Matrix atom
+cellB = 1 # Alloy atom
 
 
 def main():
     """
+    Description:
+    Main function to simulate the phase transition of the alloy with several parameters.
+
+    Positional arguments:
+    -> natoms:            Total number of total atoms
+    -> nEquil:            Total number of Monte Carlo moves to reach the equilibrium
+    -> nSweeps:           Total number of Monte Carlo moves
+    -> fAlly_list:        Compositions of alloy atoms in the matrix
+    -> T_list:            Temperature lists
+    -> Eam_List:          Interacton energy between alloy and host atoms
+
+    Return:
 
     """
     # Define the simulation parameters
-    nBox = 10
+    natoms = 10                                       
     nEquil = 50000
     nSweeps = 100000
     fAlloy_list = [0.1, 0.2, 0.3, 0.4, 0.5]
     T_list = [300, 1000, 2000]
     Eam_list = [-0.1, 0.0, 0.1]
+
+    # Randomly generate the direction of the neighbour of the first chosen atom
+    d12 = np.random.randint(1, 5, 1, dtype='int')
     
     # Open file to save the statistics
     file = open ("stats.csv", "w")
@@ -21,8 +44,8 @@ def main():
     # Loop over values
     count = 0
     for fAlloy in fAlloy_list:
-    for T in T_list:
-    for Eam in Eam_list:
+        for T in T_list:
+            for Eam in Eam_list:
     count = count + 1
     job = '{:04d}'.format(count)
     
