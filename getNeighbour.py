@@ -2,38 +2,31 @@ import numpy as np
 #######################################################################################
 
 
-def getNeighbour (size, ix1, iy1, d12):
+def getNeighbour (size, x, y, d12):
     """
     Description:
     GETNEIGHBOUR returns the position of a neighbouring atom.
 
     Input arguments:
     -> size:                  The size of the simulation box                        int
-    -> ix1:                   X coordinate of first atom                            int
-    -> iy1:                   Y coordinate of first atom                            int
-    -> d12:                   Direction of second atom relative to first
-                              1: above; 2: down; 3: right; 4: left                  int
+    -> x:                     X coordinate of first atom                            int
+    -> y:                     Y coordinate of first atom                            int
 
     Output arguments:
-    -> ix2:                   X coordinate of second atom                           int
-    -> iy2:                   Y coordinate of second atom                           int
+    -> Array:                 Contains all nearest four neighbours of the atom
     """
-    # Get its neighbour based on the direction (d12)
-    if np.logical_or(d12 == 1, d12 == 2):
-        ix2 = ix1 + (-1)**(1 + d12)
-        iy2 = iy1
-
-    else:
-        ix2 = ix1
-        iy2 = iy1 + (-1)**(1 + d12)
+    # Get all four nearest neighbours around the chosen atom
+    neighbours = np.array([
+        [x - 1, y],
+        [x + 1, y],
+        [x, y + 1],
+        [x, y - 1]
+    ])
 
     # Check whether the coordinates out of the boundary of the matrix
-    # If out, change them as the periodic boundary conditions
-    pair = periodic_boundary(ix2, iy2, size)
-    ix2, iy2 = pair[0][0], pair[0][1]
-
+    # If out, change them as the periodic boundary condition
     # Return the new coordinates
-    return ix2, iy2
+    return periodic_boundary(neighbours, size)
 
 
 def periodic_boundary(arr, size):
