@@ -74,6 +74,6 @@ def main():
     print ("Simulations completed.")
 
 
-    # Ensure main is invoked
+# Ensure main is invoked
 if __name__== "__main__":
     main()

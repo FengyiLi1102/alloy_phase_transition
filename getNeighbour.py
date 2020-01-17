@@ -2,7 +2,7 @@ import numpy as np
 #######################################################################################
 
 
-def getNeighbour (size, x, y, d12):
+def getNeighbour (size, x, y):
     """
     Description:
     GETNEIGHBOUR returns the position of a neighbouring atom.
