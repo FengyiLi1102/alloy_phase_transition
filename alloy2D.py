@@ -1,7 +1,14 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from set_up import set_up
+from alloy2D import alloy2D
+from getNeighbour import *
+from order2D import order2D
+from orderRandom import orderRandom
+from swapInfo import swapInfo
 
 #######################################################################################
-def alloy2D(nBox, fAlloy, nSweeps, nEquil, T, Eam, job):
+def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     """
     Description:
     ALLOY2D Performs Metropolis Monte Carlo of a lattice gas model of an alloy.
@@ -24,6 +31,21 @@ def alloy2D(nBox, fAlloy, nSweeps, nEquil, T, Eam, job):
     -> Ebar:    The average energy                                              float
     -> C:       The heat capacity                                               float
     """ 
+    # Set up the matrix
+    config = set_up(cellA, cellB, size, fAlloy)
+
+    # The initial total energy of the matrix
+    Eo = 0
+    for x in config.shape[0]:
+
+        for y in config.shape[1]:
+            neighbours = getNeighbour(size, x, y)   # Four nearest neighbours
+            
+            for pair in neighbours:
+                Eo += int(config[x, y] + config[pair[0], pair[1]] == 1) * Eam
+
+    # Swap the atoms based on the energy change
+
     # Plot the configuration
     # Put extra zeros around border so pcolor works properly.
     config_plot = np.zeros((size+1, size+1))

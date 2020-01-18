@@ -5,7 +5,7 @@ from getNeighbour import *
 
 k_B = constants.value(u'Boltzmann constant in eV/K')
 
-def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam):
+def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam, T):
     """
     Description:
     SWAPINFO returns the position of the neighbour and the energy change.
@@ -22,6 +22,7 @@ def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam):
     -> natoms:      Number of atoms                                  int
     -> Ematrix:     The 2x2 matrix of bond energies                  array(2, 2)
     -> size:        Dimension of the matrix                          int
+    -> T:           Temperature in Klevin                            float
 
     Output arguments:
     -> ixb:         X coordinate of second atom
@@ -29,7 +30,7 @@ def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam):
     -> dE:          Energy change following swap
     """
     # Get the neighbour position for atom a
-    neighbours_a = getNeighbour(size, ixa, iya, dab)
+    neighbours_a = getNeighbour(size, ixa, iya)
     ixb, iyb = neighbours_a[np.random.randint(0, 4, 1, dtype='int')]
 
     # Get all neighbours of the ataom a except atom b
