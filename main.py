@@ -44,11 +44,6 @@ def main():
         for T in T_list:
 
             for Eam in Eam_list:
-                # Set up the simulation matrix
-                config = set_up(cellA, cellB, size, fAlloy)
-
-                # Randomly generate the direction of the neighbour of the first chosen atom
-                d12 = np.random.randint(1, 5, 1, dtype='int')
                 count = count + 1
                 job = '{:04d}'.format(count)
                 

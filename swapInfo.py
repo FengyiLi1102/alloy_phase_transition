@@ -31,7 +31,7 @@ def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam, T):
     """
     # Get the neighbour position for atom a
     neighbours_a = getNeighbour(size, ixa, iya)
-    ixb, iyb = neighbours_a[np.random.randint(0, 4, 1, dtype='int')]
+    ixb, iyb = neighbours_a[dab][0], neighbours_a[dab][1]
 
     # Get all neighbours of the ataom a except atom b
     mask_a = np.where(neighbours_a == [ixb, iyb], False, True)

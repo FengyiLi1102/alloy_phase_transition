@@ -34,8 +34,12 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     # Set up the matrix
     config = set_up(cellA, cellB, size, fAlloy)
 
-    # The initial total energy of the matrix
-    Eo = 0
+    Eo = 0                  # The initial total energy of the matrix
+    step = 0                # The initial step for energy record
+    Etable = []             # Record the energy per 1000 step
+    natoms = size**2        # Number of total atoms
+
+    # Calculate the initial energy
     for x in config.shape[0]:
 
         for y in config.shape[1]:
@@ -44,15 +48,36 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
             for pair in neighbours:
                 Eo += int(config[x, y] + config[pair[0], pair[1]] == 1) * Eam
 
-    # Swap the atoms based on the energy change
 
+    Etable.append(Eo)       # Initial energy
+
+    # Randomly generate the number equal to nSweeps of positions to make swaps
+    positions = np.random.randint(0, size+1, (2, nSweeps), dtype='int')
+
+    # Randomly generate the directions for each swap
+    directions = np.random.randint(0, 4, (nSweeps, 1), dtype='int')
+
+    # Swap the atoms based on the energy change
+    for step in nSweeps:
+        ixb, iyb, dE = swapInfo(positions[0][step], positions[1][step], 
+                                directions[step], natoms, config, Ematrix,
+                                size, Eam, T)
+        
+        # Eneregy change
+        Eo += dE
+
+        # Record the data per 1000 step
+        if step % 1000 == 0:
+            Etable.append(Eo)
+
+    
     # Plot the configuration
     # Put extra zeros around border so pcolor works properly.
     config_plot = np.zeros((size+1, size+1))
     config_plot[0:size, 0:size] = config
     plt.figure(0)
     plt.pcolor(config_plot)
-    plt.savefig(job+'-config.png')
+    plt.savefig(job + '-config.png')
     plt.close(0)
     
     # Plot the energy
@@ -61,7 +86,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     plt.title ("Energy")
     plt.xlabel("Time step / 1000")
     plt.ylabel("Energy")
-    plt.savefig(job+'-energy.png')
+    plt.savefig(job + '-energy.png')
     plt.close(1)
     #
     # Plot the final neighbour distribution
