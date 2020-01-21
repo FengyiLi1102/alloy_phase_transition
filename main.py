@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from alloy2D import alloy2D
 
 
 #######################################################################################
@@ -34,8 +35,8 @@ def main():
     Eam_list = [-0.1, 0.0, 0.1]
     
     # Open file to save the statistics
-    #file = open ("stats.csv", "w")
-    #file.write('Job number, Alloy fraction, Temperature (K), Unlike bond energy (eV), Average number of unlike neighbours, Average energy (eV), Heat capacity (kB)\n')
+    file = open ("stats.csv", "w")
+    file.write('Job number, Alloy fraction, Temperature (K), Unlike bond energy (eV), Average number of unlike neighbours, Average energy (eV), Heat capacity (kB)\n')
     
     # Loop over values
     count = 0
@@ -51,7 +52,7 @@ def main():
                 print ("")
                 print ("Simulation ", job)
                 print ("----------------")
-                print ("Cell size = ", nBox)
+                print ("Cell size = ", size)
                 print ("Alloy fraction = ", fAlloy)
                 print ("Total number of moves = ", nSweeps)
                 print ("Number of equilibration moves = ", nEquil)
@@ -59,7 +60,7 @@ def main():
                 print ("Bond energy = ", Eam, "eV")
                 
                 # Run the simulation
-                nBar, Ebar, C = alloy2D(nBox, fAlloy, nSweeps, nEquil, T, Eam, job)
+                nBar, Ebar, C = alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
                 
                 # Write out the statistics
                 file.write('{0:4d}, {1:6.4f}, {2:8.2f}, {3:5.2f}, {4:6.4f}, {5:14.7g}, {6:14.7g}\n'.format(count, fAlloy, T, Eam, nBar, Ebar, C))

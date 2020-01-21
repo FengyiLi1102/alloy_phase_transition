@@ -1,11 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from set_up import set_up
-from alloy2D import alloy2D
 from getNeighbour import *
 from order2D import order2D
 from orderRandom import orderRandom
 from swapInfo import swapInfo
+
+# Globle variables
+cellA = 0
+cellB = 1
 
 #######################################################################################
 def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
@@ -40,9 +43,9 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     natoms = size**2        # Number of total atoms
 
     # Calculate the initial energy
-    for x in config.shape[0]:
+    for x in np.arange(config.shape[0]):
 
-        for y in config.shape[1]:
+        for y in np.arange(config.shape[1]):
             neighbours = getNeighbour(size, x, y)   # Four nearest neighbours
             
             for pair in neighbours:
@@ -52,15 +55,15 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     Etable.append(Eo)       # Initial energy
 
     # Randomly generate the number equal to nSweeps of positions to make swaps
-    positions = np.random.randint(0, size+1, (2, nSweeps), dtype='int')
+    positions = np.random.randint(0, size, (2, nSweeps), dtype='int')
 
     # Randomly generate the directions for each swap
     directions = np.random.randint(0, 4, (nSweeps, 1), dtype='int')
 
     # Swap the atoms based on the energy change
-    for step in nSweeps:
+    for step in np.arange(nSweeps):
         ixb, iyb, dE = swapInfo(positions[0][step], positions[1][step], 
-                                directions[step], natoms, config, Ematrix,
+                                directions[step], natoms, config,
                                 size, Eam, T)
         
         # Eneregy change
@@ -70,7 +73,11 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
         if step % 1000 == 0:
             Etable.append(Eo)
 
+        """# Monitor the energy change
+        if dE <= 0.0000000000000000001:
+            break"""
     
+
     # Plot the configuration
     # Put extra zeros around border so pcolor works properly.
     config_plot = np.zeros((size+1, size+1))
@@ -82,13 +89,13 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     
     # Plot the energy
     plt.figure(1)
-    plt.plot (Etable[0:nTable+1])
+    plt.plot (Etable[0:])
     plt.title ("Energy")
     plt.xlabel("Time step / 1000")
     plt.ylabel("Energy")
     plt.savefig(job + '-energy.png')
     plt.close(1)
-    #
+
     # Plot the final neighbour distribution
     N, P = order2D(config)
     N0, P0 = orderRandom(4, fAlloy)
@@ -102,18 +109,18 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     plt.legend()
     plt.savefig(job+'-order.png')
     plt.close(2)
-    #
+    
     # Display the plots (GUI only)
     # plt.show()
-    #
+    
     # Print statistics
-    nBar = np.dot(N,P)
-    Ebar = Ebar/nStats
-    E2bar = E2bar/nStats
-    C = (E2bar - Ebar*Ebar)/(kT*kT)
+    nBar = np.dot(N, P)
+    Ebar = Ebar / nStats
+    E2bar = E2bar / nStats
+    C = (E2bar - Ebar*Ebar) / (kT * kT)
     print('')
     print('Heat capacity = {0:7.3f}'.format(C),' kB')
     print('The average number of unlike neighbours is = {0:7.3f}'.format(nBar))
-    #
+    
     # Return the statistics
     return nBar, Ebar, C

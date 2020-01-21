@@ -5,7 +5,7 @@ from getNeighbour import *
 
 k_B = constants.value(u'Boltzmann constant in eV/K')
 
-def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam, T):
+def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
     """
     Description:
     SWAPINFO returns the position of the neighbour and the energy change.
@@ -31,16 +31,16 @@ def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam, T):
     """
     # Get the neighbour position for atom a
     neighbours_a = getNeighbour(size, ixa, iya)
-    ixb, iyb = neighbours_a[dab][0], neighbours_a[dab][1]
+    ixb, iyb = neighbours_a[dab[0]][0], neighbours_a[dab[0]][1]
 
     # Get all neighbours of the ataom a except atom b
-    mask_a = np.where(neighbours_a == [ixb, iyb], False, True)
-    neighbours_a_masked = neighbours_a[mask_a,...]
+    mask_a = mask(neighbours_a, ixb, iyb)
+    neighbours_a_masked = np.extract(mask_a, neighbours_a).reshape(3, 2)
 
     # Get all neighbours of the ataom b except atom a
     neighbours_b = getNeighbour(size, ixb, iyb)
-    mask_b = np.where(neighbours_b == [ixa, iya], False, True)
-    neighbours_b_masked = neighbours_b[mask_b,...]
+    mask_b = mask(neighbours_b, ixa, iya)
+    neighbours_b_masked = np.extract(mask_b, neighbours_b).reshape(3, 2)
     
     # Initialize the original energy
     dE = 0
@@ -55,13 +55,22 @@ def swapInfo(ixa, iya, dab, natoms, config, Ematrix, size, Eam, T):
         dE -= int(config[ixa][iya] + config[pair[0]][pair[1]] == 1) * Eam
     
     # Ckech if the energy decreases
-    if dE > 0:     # Invalid
-
-        if np.exp(dE / (k_B * T)) < np.random.random(1):
-            pass
+    if dE > 0 and np.exp(dE / (k_B * T)) < np.random.random(1):     # Invalid
+        pass
 
     else:          # Valid
         config[ixa][iya], config[ixb][iyb] = config[ixb][iyb], config[ixa][iya]
 
 
     return ixb, iyb, dE
+
+
+def mask(neighbour, x, y):
+    """
+
+    """
+    #
+    mask = (neighbour[:, 0] != x) | (neighbour[:, 1] != y)
+    mask = mask.reshape(4, 1)
+
+    return np.hstack([mask, mask])

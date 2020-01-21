@@ -17,10 +17,10 @@ def getNeighbour (size, x, y):
     """
     # Get all four nearest neighbours around the chosen atom
     neighbours = np.array([
-        [x - 1, y],     # Left
-        [x + 1, y],     # Rright
-        [x, y + 1],     # Top
-        [x, y - 1]      # Bottom
+        [x, y - 1],     # Left
+        [x, y + 1],     # Rright
+        [x - 1, y],     # Top
+        [x + 1, y]      # Bottom
     ])
 
     # Check whether the coordinates out of the boundary of the matrix
