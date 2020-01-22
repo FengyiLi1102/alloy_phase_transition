@@ -56,7 +56,7 @@ def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
     
     # Ckech if the energy decreases
     if dE > 0 and np.exp(dE / (k_B * T)) < np.random.random(1):     # Invalid
-        pass
+        dE = 0
 
     else:          # Valid
         config[ixa][iya], config[ixb][iyb] = config[ixb][iyb], config[ixa][iya]
@@ -67,9 +67,19 @@ def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
 
 def mask(neighbour, x, y):
     """
+    Description:
+    Generate a mask to remove the atom a that is present in four neighbours of the
+    atom b to increase the efficiency.
 
+    Input parameters:
+    -> neighbour:       neighbours of the atom a                            array(4, 2)
+    -> x:               X coordinate of the atom a                                  int
+    -> y:               Y coordinate of the atom b                                  int
+
+    Return:
+    -> mask:            Array in two dimensions containing True and False   array(4, 2)
     """
-    #
+    # Keep the atom in the neighbours of the atom a except atom b
     mask = (neighbour[:, 0] != x) | (neighbour[:, 1] != y)
     mask = mask.reshape(4, 1)
 
