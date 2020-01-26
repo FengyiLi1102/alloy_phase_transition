@@ -55,7 +55,7 @@ def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
         dE -= int(config[ixa][iya] + config[pair[0]][pair[1]] == 1) * Eam
     
     # Ckech if the energy decreases
-    if dE > 0 and np.exp(dE / (k_B * T)) < np.random.random(1):     # Invalid
+    if dE > 0 and np.exp(-dE / (k_B * T)) < np.random.random(1):     # Invalid
         dE = 0
 
     else:          # Valid

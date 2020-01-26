@@ -51,7 +51,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
             for pair in neighbours:
                 Eo += int(config[x, y] + config[pair[0], pair[1]] == 1) * Eam
 
-
+    Eo = Eo / 2
     Etable.append(Eo)       # Initial energy
 
     # Randomly generate the number equal to nSweeps of positions to make swaps
