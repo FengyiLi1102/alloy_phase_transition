@@ -70,13 +70,20 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
         Eo += dE
 
         # Record the data per 1000 step
-        if step % 1000 == 0:
+        if step % 1000 == 0 and step >= nEquil:
             Etable.append(Eo)
-
-        """# Monitor the energy change
-        if dE <= 0.0000000000000000001:
-            break"""
     
+
+    # Ensure the simulation is reasonable for reaching the equilibrium
+    Etable_0 = np.asarray(Etable.copy()[0: -1])
+    Etable_1 = np.asarray(Etable.copy()[1:])
+    Ediff = Etable_1 - Etable_0   # Energy difference between two recordings
+
+    if sum(Ediff[1:]) != 0:       # Osilliation occurrs
+        alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
+    
+    # After reaching the equilibrium, run more steps for the 
+    # phase transition temperature
 
     # Plot the configuration
     # Put extra zeros around border so pcolor works properly.
@@ -101,7 +108,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     N0, P0 = orderRandom(4, fAlloy)
     plt.figure(2)
     bar_width = 0.35
-    plt.bar(N , P, bar_width, label="Simulation")
+    plt.bar(N, P, bar_width, label="Simulation")
     plt.bar(N0+bar_width, P0, bar_width, label="Random")
     plt.title ("Distribution of unlike neighbours")
     plt.xlabel("Number of unlike neighbours")

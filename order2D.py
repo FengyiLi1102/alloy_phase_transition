@@ -15,14 +15,15 @@ def order2D(config):
     -> N:          List of possible number of neighbours                    array(1, 4)
     -> P:          The probability distribution of the order parameter      array(1, 4)
     """
-    size = config.shape[0]                  # Dimension of the matrix
-    N = np.linspace(0, size, size+1)        # List of possible number of neighbours
-    P = np.zeros((size+1, 1))               # Probability distribution
+    size = config.shape[0]            # Dimension of the alloy matrix
+    Z = 4                             # Number of the neighbours
+    N = np.linspace(0, Z, Z+1)        # List of possible number of neighbours
+    P = np.zeros(5)            # Probability distribution
 
     # Count the number of each order paramenter
-    for x in config.shape[0]:
+    for x in np.arange(config.shape[0]):
 
-        for y in config.shape[1]:                       # Pointwise atom from (1, 1)
+        for y in np.arange(config.shape[1]):            # Pointwise atom from (0, 0)
             count = 0                                   # Number of unlike pairs
             neighbours = getNeighbour(size, x, y)       # Neighbour array
 
@@ -33,6 +34,7 @@ def order2D(config):
             P[count] += 1                               # Update the order parameters
     
     P = P / (size**2)                                   # Probability distribution
+    
 
 
     return N, P

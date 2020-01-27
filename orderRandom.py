@@ -26,7 +26,7 @@ def orderRandom(Z, f):
     # probability distribution
     for n in N:
         Z_C_n = math.factorial(Z) / (math.factorial(n) * math.factorial(Z - n))
-        P[n] = Z_C_n * (f * (f**(Z-n)) * ((1 - f)**n)
+        P[int(n)] = Z_C_n * (f * (f**(Z-n)) * ((1 - f)**n)
                + (1 - f) * (f**n) * (1 - f)**(Z - n)) 
 
     return N, P
