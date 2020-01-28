@@ -42,9 +42,10 @@ def main():
     count = 0
     for fAlloy in fAlloy_list:
 
-        for T in T_list:
+        for Eam in Eam_list:
+            orders = list()
 
-            for Eam in Eam_list:
+            for T in T_list:
                 count = count + 1
                 job = '{:04d}'.format(count)
                 
@@ -60,11 +61,17 @@ def main():
                 print ("Bond energy = ", Eam, "eV")
                 
                 # Run the simulation
-                nBar, Ebar, C = alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
+                nBar, Ebar, C, ORDERbar = alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
                 
+                #
+                orders.append(ORDERbar)
+
                 # Write out the statistics
                 file.write('{0:4d}, {1:6.4f}, {2:8.2f}, {3:5.2f}, {4:6.4f}, {5:14.7g}, {6:14.7g}\n'.format(count, fAlloy, T, Eam, nBar, Ebar, C))
-    
+
+            # Find the phase transition temperature for the alloy with the given fraction and bond energy
+
+
     # Close the file
     file.close()
     

@@ -36,5 +36,4 @@ def order2D(config):
     P = P / (size**2)                                   # Probability distribution
     
 
-
     return N, P

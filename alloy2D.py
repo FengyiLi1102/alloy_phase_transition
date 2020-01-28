@@ -79,11 +79,32 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     Etable_1 = np.asarray(Etable.copy()[1:])
     Ediff = Etable_1 - Etable_0   # Energy difference between two recordings
 
-    if sum(Ediff[1:]) != 0:       # Osilliation occurrs
+    if sum(Ediff[3:]) != 0:       # Osilliation occurrs
         alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
     
     # After reaching the equilibrium, run more steps for the 
     # phase transition temperature
+    ORDER = list()
+    test_steps = 30000
+
+    # Randomly generate the number equal to nSweeps of positions to make swaps
+    positions = np.random.randint(0, size, (2, test_steps), dtype='int')
+
+    # Randomly generate the directions for each swap
+    directions = np.random.randint(0, 4, (test_steps, 1), dtype='int')
+
+    for step in np.arange(test_steps):
+        ixb, iyb, dE = swapInfo(positions[0][step], positions[1][step], 
+                                directions[step], natoms, config,
+                                size, Eam, T)
+
+        if step % 1000 == 0:
+            N, P = order2D(config)
+            P = P * (natoms)
+            ORDER.append(np.dot(N, P) / natoms)
+    
+
+    ORDERbar = sum(ORDER) / (test_steps/1000)
 
     # Plot the configuration
     # Put extra zeros around border so pcolor works properly.
@@ -130,4 +151,4 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     print('The average number of unlike neighbours is = {0:7.3f}'.format(nBar))
     
     # Return the statistics
-    return nBar, Ebar, C
+    return nBar, Ebar, C, ORDERbar
