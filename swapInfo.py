@@ -47,20 +47,22 @@ def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
 
     # Calculate the original local energy within a defined matrix
     for pair in neighbours_a_masked:
-        dE += int(config[ixa][iya] + config[pair[0]][pair[1]] == 1) * Eam
-        dE -= int(config[ixb][iyb] + config[pair[0]][pair[1]] == 1) * Eam
+        dE -= int(config[ixa][iya] + config[pair[0]][pair[1]] == 1) * Eam
+        dE += int(config[ixb][iyb] + config[pair[0]][pair[1]] == 1) * Eam
     
     for pair in neighbours_b_masked:
-        dE += int(config[ixb][iyb] + config[pair[0]][pair[1]] == 1) * Eam
-        dE -= int(config[ixa][iya] + config[pair[0]][pair[1]] == 1) * Eam
+        dE -= int(config[ixb][iyb] + config[pair[0]][pair[1]] == 1) * Eam
+        dE += int(config[ixa][iya] + config[pair[0]][pair[1]] == 1) * Eam
     
     # Ckech if the energy decreases
-    if dE > 0 and np.exp(-dE / (k_B * T)) < np.random.random(1):     # Invalid
-        dE = 0
-
-    else:          # Valid
+    if dE <= 0:
         config[ixa][iya], config[ixb][iyb] = config[ixb][iyb], config[ixa][iya]
 
+    elif np.exp(-dE / (k_B * T)) > np.random.uniform(0, 1):
+        config[ixa][iya], config[ixb][iyb] = config[ixb][iyb], config[ixa][iya]
+
+    else:
+        dE = 0
 
     return ixb, iyb, dE
 

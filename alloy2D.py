@@ -5,10 +5,12 @@ from getNeighbour import *
 from order2D import order2D
 from orderRandom import orderRandom
 from swapInfo import swapInfo
+from scipy import constants
 
 # Globle variables
 cellA = 0
 cellB = 1
+k = constants.value(u'Boltzmann constant in eV/K')
 
 #######################################################################################
 def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
@@ -41,6 +43,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     step = 0                # The initial step for energy record
     Etable = []             # Record the energy per 1000 step
     natoms = size**2        # Number of total atoms
+    step_interval = 10
 
     # Calculate the initial energy
     for x in np.arange(config.shape[0]):
@@ -52,13 +55,10 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
                 Eo += int(config[x, y] + config[pair[0], pair[1]] == 1) * Eam
 
     Eo = Eo / 2
-    Etable.append(Eo)       # Initial energy
+    #Etable.append(Eo)       # Initial energy
 
     # Randomly generate the number equal to nSweeps of positions to make swaps
-    positions = np.random.randint(0, size, (2, nSweeps), dtype='int')
-
-    # Randomly generate the directions for each swap
-    directions = np.random.randint(0, 4, (nSweeps, 1), dtype='int')
+    positions, directions = generator(nSweeps, size)
 
     # Swap the atoms based on the energy change
     for step in np.arange(nSweeps):
@@ -70,41 +70,29 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
         Eo += dE
 
         # Record the data per 1000 step
-        if step % 1000 == 0 and step >= nEquil:
+        if step >= nEquil and step % step_interval == 0:
             Etable.append(Eo)
     
 
-    # Ensure the simulation is reasonable for reaching the equilibrium
-    Etable_0 = np.asarray(Etable.copy()[0: -1])
-    Etable_1 = np.asarray(Etable.copy()[1:])
-    Ediff = Etable_1 - Etable_0   # Energy difference between two recordings
-
-    if sum(Ediff[3:]) != 0:       # Osilliation occurrs
-        alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
-    
     # After reaching the equilibrium, run more steps for the 
     # phase transition temperature
-    ORDER = list()
-    test_steps = 30000
+    test_steps = 50000      # More steps for finding the transition temperature
 
-    # Randomly generate the number equal to nSweeps of positions to make swaps
-    positions = np.random.randint(0, size, (2, test_steps), dtype='int')
+    # Randomly generate two arrays for swapping atoms
+    positions, directions = generator(test_steps, size)
+    nStat = test_steps / step_interval
 
-    # Randomly generate the directions for each swap
-    directions = np.random.randint(0, 4, (test_steps, 1), dtype='int')
-
+    # Run more steps
     for step in np.arange(test_steps):
         ixb, iyb, dE = swapInfo(positions[0][step], positions[1][step], 
                                 directions[step], natoms, config,
                                 size, Eam, T)
+        
+        Eo += dE
 
-        if step % 1000 == 0:
-            N, P = order2D(config)
-            P = P * (natoms)
-            ORDER.append(np.dot(N, P) / natoms)
+        if step % step_interval == 0:
+            Etable.append(Eo)
     
-
-    ORDERbar = sum(ORDER) / (test_steps/1000)
 
     # Plot the configuration
     # Put extra zeros around border so pcolor works properly.
@@ -112,16 +100,17 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     config_plot[0:size, 0:size] = config
     plt.figure(0)
     plt.pcolor(config_plot)
-    plt.savefig(job + '-config.png')
+    plt.savefig(f'E:\Coding\alloy_phase_transition\Config\{}-config.png'.format(job))
     plt.close(0)
     
     # Plot the energy
     plt.figure(1)
-    plt.plot (Etable[0:])
+    Eequil = int((nSweeps - nEquil) / step_interval)
+    plt.plot (Etable[0: Eequil])
     plt.title ("Energy")
     plt.xlabel("Time step / 1000")
-    plt.ylabel("Energy")
-    plt.savefig(job + '-energy.png')
+    plt.ylabel("Energy (eV)")
+    plt.savefig(f'E:\Coding\alloy_phase_transition\Energy\{}-energy.png'.format(job))
     plt.close(1)
 
     # Plot the final neighbour distribution
@@ -135,7 +124,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     plt.xlabel("Number of unlike neighbours")
     plt.ylabel("Probability")
     plt.legend()
-    plt.savefig(job+'-order.png')
+    plt.savefig(f'E:\Coding\alloy_phase_transition\order\{}-order.png'.format(job))
     plt.close(2)
     
     # Display the plots (GUI only)
@@ -143,12 +132,46 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     
     # Print statistics
     nBar = np.dot(N, P)
-    Ebar = Ebar / nStats
-    E2bar = E2bar / nStats
-    C = (E2bar - Ebar*Ebar) / (kT * kT)
+
+    # Ebar
+    E_total_bar = sum(Etable[Eequil+1:]) / nStat
+    E_unit_bar = E_total_bar / natoms
+
+    # E2bar
+    Etable = np.asarray(Etable)
+    E2_total_bar = sum((Etable[Eequil+1:])**2) / nStat
+    E2_unit_bar = E2_total_bar / natoms
+
+    C = (E2_unit_bar - E_unit_bar**2) / ((k**2) * (T**2))
     print('')
     print('Heat capacity = {0:7.3f}'.format(C),' kB')
     print('The average number of unlike neighbours is = {0:7.3f}'.format(nBar))
     
     # Return the statistics
-    return nBar, Ebar, C, ORDERbar
+    return nBar, E_total_bar, C
+
+
+def generator(N1, size):
+    """
+    Description:
+    Ramdonly generate two arrays with the chosen atoms and the direction pointing 
+    to the second atom.
+
+    Positional arguments:
+    -> N1:      limit for the number of atoms required to be swapped  
+
+    Keyward arguments:
+    -> N2:      limit for the number of steps required to equilibrate the matrix
+
+    Return:
+    -> positions:       coordinates of the first atom                  array(2, N1)
+    -> directions:      number indicating the second atom              array(N2, 1)
+    """
+    # Randomly generate the number equal to nSweeps of positions to make swaps
+    positions = np.random.randint(0, size, (2, N1), dtype='int')
+
+    # Randomly generate the directions for each swap
+    directions = np.random.randint(0, 4, (N1, 1), dtype='int')
+
+
+    return positions, directions

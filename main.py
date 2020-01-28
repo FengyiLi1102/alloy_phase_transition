@@ -61,10 +61,10 @@ def main():
                 print ("Bond energy = ", Eam, "eV")
                 
                 # Run the simulation
-                nBar, Ebar, C, ORDERbar = alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
+                nBar, Ebar, C = alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job)
                 
                 #
-                orders.append(ORDERbar)
+                orders.append(nBar)
 
                 # Write out the statistics
                 file.write('{0:4d}, {1:6.4f}, {2:8.2f}, {3:5.2f}, {4:6.4f}, {5:14.7g}, {6:14.7g}\n'.format(count, fAlloy, T, Eam, nBar, Ebar, C))
