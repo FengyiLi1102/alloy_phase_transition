@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
 from set_up import set_up
 from getNeighbour import *
 from order2D import order2D
@@ -7,13 +8,17 @@ from orderRandom import orderRandom
 from swapInfo import swapInfo
 from scipy import constants
 
+
+# Globle setting for the figure drawing
+figure(figsize=(7, 6), dpi=300)
+
 # Globle variables
 cellA = 0
 cellB = 1
 k = constants.value(u'Boltzmann constant in eV/K')
 
 #######################################################################################
-def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
+def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
     """
     Description:
     ALLOY2D Performs Metropolis Monte Carlo of a lattice gas model of an alloy.
@@ -55,7 +60,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
                 Eo += int(config[x, y] + config[pair[0], pair[1]] == 1) * Eam
 
     Eo = Eo / 2
-    #Etable.append(Eo)       # Initial energy
+    Etable.append(Eo)       # Initial energy
 
     # Randomly generate the number equal to nSweeps of positions to make swaps
     positions, directions = generator(nSweeps, size)
@@ -70,8 +75,8 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
         Eo += dE
 
         # Record the data per 1000 step
-        if step >= nEquil and step % step_interval == 0:
-            Etable.append(Eo)
+        #if step >= nEquil and step % step_interval == 0:
+        Etable.append(Eo)
     
 
     # After reaching the equilibrium, run more steps for the 
@@ -93,53 +98,59 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
         if step % step_interval == 0:
             Etable.append(Eo)
     
-
-    # Plot the configuration
-    # Put extra zeros around border so pcolor works properly.
-    config_plot = np.zeros((size+1, size+1))
-    config_plot[0:size, 0:size] = config
-    plt.figure(0)
-    plt.pcolor(config_plot)
-    plt.savefig(f'E:\Coding\alloy_phase_transition\Config\{}-config.png'.format(job))
-    plt.close(0)
     
-    # Plot the energy
-    plt.figure(1)
-    Eequil = int((nSweeps - nEquil) / step_interval)
-    plt.plot (Etable[0: Eequil])
-    plt.title ("Energy")
-    plt.xlabel("Time step / 1000")
-    plt.ylabel("Energy (eV)")
-    plt.savefig(f'E:\Coding\alloy_phase_transition\Energy\{}-energy.png'.format(job))
-    plt.close(1)
+    # Choose some states to draw the figure
+    T_figure = T_list[::10]
 
-    # Plot the final neighbour distribution
-    N, P = order2D(config)
-    N0, P0 = orderRandom(4, fAlloy)
-    plt.figure(2)
-    bar_width = 0.35
-    plt.bar(N, P, bar_width, label="Simulation")
-    plt.bar(N0+bar_width, P0, bar_width, label="Random")
-    plt.title ("Distribution of unlike neighbours")
-    plt.xlabel("Number of unlike neighbours")
-    plt.ylabel("Probability")
-    plt.legend()
-    plt.savefig(f'E:\Coding\alloy_phase_transition\order\{}-order.png'.format(job))
-    plt.close(2)
+    if T in T_figure:
+        # Plot the configuration
+        # Put extra zeros around border so pcolor works properly.
+        config_plot = np.zeros((size+1, size+1))
+        config_plot[0:size, 0:size] = config
+        plt.figure(0)
+        plt.pcolor(config_plot)
+        plt.title("Schematic configuration of the alloy")
+        plt.xlabel("X_axis boundary")
+        plt.ylabel("Y_axis boundary")
+        plt.savefig(r'E:\Coding\alloy_phase_transition\Config\{}---config.png'.format(job))
+        plt.close(0)
+        
+        # Plot the energy
+        plt.figure(1)
+        plt.plot (Etable[0: int(nSweeps/step_interval)])
+        plt.title ("Energy change to the move steps of an alloy")
+        plt.xlabel("Time step / 10")
+        plt.ylabel("Energy (eV)")
+        plt.savefig(r'E:\Coding\alloy_phase_transition\Energy\{}---energy.png'.format(job))
+        plt.close(1)
+
+        # Plot the final neighbour distribution
+        N, P = order2D(config)
+        N0, P0 = orderRandom(4, fAlloy)
+        plt.figure(2)
+        bar_width = 0.35
+        plt.bar(N, P, bar_width, label="Simulation")
+        plt.bar(N0+bar_width, P0, bar_width, label="Random")
+        plt.title ("Distribution of unlike neighbours")
+        plt.xlabel("Number of unlike neighbours")
+        plt.ylabel("Probability")
+        plt.legend()
+        plt.savefig(r'E:\Coding\alloy_phase_transition\order\{}-order.png'.format(job))
+        plt.close(2)
     
     # Display the plots (GUI only)
     # plt.show()
-    
+    N, P = order2D(config)
     # Print statistics
     nBar = np.dot(N, P)
 
     # Ebar
-    E_total_bar = sum(Etable[Eequil+1:]) / nStat
+    E_total_bar = sum(Etable[int(nSweeps/step_interval)+1:]) / nStat
     E_unit_bar = E_total_bar / natoms
 
     # E2bar
     Etable = np.asarray(Etable)
-    E2_total_bar = sum((Etable[Eequil+1:])**2) / nStat
+    E2_total_bar = sum((Etable[int(nSweeps/step_interval)+1:])**2) / nStat
     E2_unit_bar = E2_total_bar / natoms
 
     C = (E2_unit_bar - E_unit_bar**2) / ((k**2) * (T**2))
@@ -148,7 +159,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job):
     print('The average number of unlike neighbours is = {0:7.3f}'.format(nBar))
     
     # Return the statistics
-    return nBar, E_total_bar, C
+    return nBar, E_total_bar, C, Etable
 
 
 def generator(N1, size):
