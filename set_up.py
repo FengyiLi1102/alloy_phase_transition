@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def set_up(cellA, cellB, size, fraction):
@@ -25,6 +26,25 @@ def set_up(cellA, cellB, size, fraction):
         (np.zeros((1, nA), dtype='int'), np.ones((1, nB), dtype='int')),
         axis=None
     )
-    np.random.shuffle(matrix)
+    np.random.shuffle(matrix)       # Randomly distribute atoms
     
+    
+    # Reshape into the required dimension
     return np.reshape(matrix, (size, size))
+
+
+###############################################################################
+################################TEST ONLY######################################
+###############################################################################
+if __name__ == '__main__':
+    size = 10
+    fraction = 0.1
+    config = set_up(0, 1, size, fraction)
+    config_plot = np.zeros((size+1, size+1))
+    config_plot[0:size, 0:size] = config
+    plt.figure(0)
+    plt.pcolor(config_plot)
+    plt.title("Schematic configuration of the alloy")
+    plt.xlabel("X axis boundary")
+    plt.ylabel("Y axis boundary")
+    plt.show()

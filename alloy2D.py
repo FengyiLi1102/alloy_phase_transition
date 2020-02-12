@@ -7,10 +7,19 @@ from order2D import order2D
 from orderRandom import orderRandom
 from swapInfo import swapInfo
 from scipy import constants
+import gc
+import matplotlib.pylab as pylab
 
 
 # Globle setting for the figure drawing
-figure(figsize=(7, 6), dpi=300)
+params = {'legend.fontsize': 'x-large',
+          'figure.figsize': (10, 8),
+          'axes.labelsize': 20,
+          'axes.titlesize':20,
+          'xtick.labelsize':'x-large',
+          'ytick.labelsize':'x-large',
+          'patch.edgecolor': 'white'}
+pylab.rcParams.update(params)
 
 # Globle variables
 cellA = 0
@@ -35,11 +44,13 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
     -> Eam:     Alloy-matrix interaction energy (eV)                            float
     -> job:     Name or number given to this simulation.                        string
                 Useful for creating file names
+    -> T_list:  Temperature list                                                list
 
     Output arguments:
     -> nBar:    The average number of unlike neighbours                         int
     -> Ebar:    The average energy                                              float
     -> C:       The heat capacity                                               float
+    -> Etable:  Energy to move steps under a fixed temperature                  list
     """ 
     # Set up the matrix
     config = set_up(cellA, cellB, size, fAlloy)
@@ -59,7 +70,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
             for pair in neighbours:
                 Eo += int(config[x, y] + config[pair[0], pair[1]] == 1) * Eam
 
-    Eo = Eo / 2
+    Eo = Eo / 2             # Doubled energy by calculating each bond energy twice
     Etable.append(Eo)       # Initial energy
 
     # Randomly generate the number equal to nSweeps of positions to make swaps
@@ -75,8 +86,8 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
         Eo += dE
 
         # Record the data per 1000 step
-        #if step >= nEquil and step % step_interval == 0:
-        Etable.append(Eo)
+        if step >= nEquil and step % step_interval == 0:
+            Etable.append(Eo)
     
 
     # After reaching the equilibrium, run more steps for the 
@@ -85,7 +96,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
 
     # Randomly generate two arrays for swapping atoms
     positions, directions = generator(test_steps, size)
-    nStat = test_steps / step_interval
+    nStat = test_steps
 
     # Run more steps
     for step in np.arange(test_steps):
@@ -94,12 +105,11 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
                                 size, Eam, T)
         
         Eo += dE
-
-        if step % step_interval == 0:
-            Etable.append(Eo)
+        Etable.append(Eo)
     
     
     # Choose some states to draw the figure
+    # The interval is adjustable for request
     T_figure = T_list[::10]
 
     if T in T_figure:
@@ -107,59 +117,73 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
         # Put extra zeros around border so pcolor works properly.
         config_plot = np.zeros((size+1, size+1))
         config_plot[0:size, 0:size] = config
-        plt.figure(0)
-        plt.pcolor(config_plot)
-        plt.title("Schematic configuration of the alloy")
-        plt.xlabel("X_axis boundary")
-        plt.ylabel("Y_axis boundary")
-        plt.savefig(r'E:\Coding\alloy_phase_transition\Config\{}---config.png'.format(job))
-        plt.close(0)
+        fig = plt.figure(dpi=300)
+        ax = fig.add_subplot(111)
+        ax.pcolor(config_plot)
+        ax.set_title("Schematic configuration of the alloy")
+        ax.set_xlabel("X axis boundary")
+        ax.set_ylabel("Y axis boundary")
+        fig.savefig(r'E:\Coding\alloy_phase_transition\Config\{}---config.png'.format(job))
+        plt.close(fig)
+        gc.collect()
         
-        # Plot the energy
-        plt.figure(1)
-        plt.plot (Etable[0: int(nSweeps/step_interval)])
-        plt.title ("Energy change to the move steps of an alloy")
-        plt.xlabel("Time step / 10")
-        plt.ylabel("Energy (eV)")
-        plt.savefig(r'E:\Coding\alloy_phase_transition\Energy\{}---energy.png'.format(job))
-        plt.close(1)
+        diff = nSweeps - nEquil
+        # Plot the energy change with fixed fraction and interaction energy under a temperature
+        fig = plt.figure(dpi=300)
+        ax = fig.add_subplot(111)
+        ax.plot(Etable[0: int(diff/step_interval)], linewidth=1.5)
+        ax.set_title ("Energy change to the move steps of an alloy")
+        ax.set_xlabel("Time step / 10")
+        ax.set_ylabel("Energy (eV)")
+        ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+        ax.xaxis.major.formatter._useMathText = True
+        ax.yaxis.major.formatter._useMathText = True
+        ax.xaxis.get_offset_text().set_fontsize(15)
+        ax.get_xaxis().get_major_formatter().set_useOffset(True)
+        ax.yaxis.get_offset_text().set_fontsize(15)
+        ax.get_yaxis().get_major_formatter().set_useOffset(True)
+        fig.savefig(r'E:\Coding\alloy_phase_transition\Energy\{}---energy.png'.format(job))
+        plt.close(fig)
+        gc.collect()
 
         # Plot the final neighbour distribution
         N, P = order2D(config)
         N0, P0 = orderRandom(4, fAlloy)
-        plt.figure(2)
+        fig = plt.figure(dpi=300)
+        ax = fig.add_subplot(111)
         bar_width = 0.35
-        plt.bar(N, P, bar_width, label="Simulation")
-        plt.bar(N0+bar_width, P0, bar_width, label="Random")
-        plt.title ("Distribution of unlike neighbours")
-        plt.xlabel("Number of unlike neighbours")
-        plt.ylabel("Probability")
-        plt.legend()
-        plt.savefig(r'E:\Coding\alloy_phase_transition\order\{}-order.png'.format(job))
-        plt.close(2)
+        ax.bar(N, P, bar_width, label="Simulation")
+        ax.bar(N0+bar_width, P0, bar_width, label="Random")
+        ax.set_title ("Distribution of unlike neighbours")
+        ax.set_xlabel("Number of unlike neighbours")
+        ax.set_ylabel("Probability")
+        ax.legend(loc=0)
+        fig.savefig(r'E:\Coding\alloy_phase_transition\order\{}-order.png'.format(job))
+        plt.close(fig)
+        gc.collect()
     
-    # Display the plots (GUI only)
-    # plt.show()
+
+    # Average order parameter
     N, P = order2D(config)
-    # Print statistics
     nBar = np.dot(N, P)
 
-    # Ebar
-    E_total_bar = sum(Etable[int(nSweeps/step_interval)+1:]) / nStat
-    E_unit_bar = E_total_bar / natoms
-
-    # E2bar
+    # Average energy for each atom
     Etable = np.asarray(Etable)
-    E2_total_bar = sum((Etable[int(nSweeps/step_interval)+1:])**2) / nStat
-    E2_unit_bar = E2_total_bar / natoms
+    E_unit_bar_square = ((sum(Etable[-nStat:]) / nStat)**2)
 
-    C = (E2_unit_bar - E_unit_bar**2) / ((k**2) * (T**2))
+    # Average energy square for each atom
+    E2_unit_bar = sum(Etable[-nStat:]**2) / (nStat)
+
+    # Heat capacity for each atom in the unit per K_B
+    C = (E2_unit_bar - E_unit_bar_square) / ((k**2) * (T**2))
+
     print('')
-    print('Heat capacity = {0:7.3f}'.format(C),' kB')
+    print('Heat capacity = {0:7.7f}'.format(C),' kB')
     print('The average number of unlike neighbours is = {0:7.3f}'.format(nBar))
     
     # Return the statistics
-    return nBar, E_total_bar, C, Etable
+    return nBar, E_unit_bar_square, C, Etable
 
 
 def generator(N1, size):
@@ -170,13 +194,11 @@ def generator(N1, size):
 
     Positional arguments:
     -> N1:      limit for the number of atoms required to be swapped  
-
-    Keyward arguments:
-    -> N2:      limit for the number of steps required to equilibrate the matrix
+    -> size:    The scale of the alloy matrix
 
     Return:
     -> positions:       coordinates of the first atom                  array(2, N1)
-    -> directions:      number indicating the second atom              array(N2, 1)
+    -> directions:      number indicating the second atom              array(N1, 1)
     """
     # Randomly generate the number equal to nSweeps of positions to make swaps
     positions = np.random.randint(0, size, (2, N1), dtype='int')

@@ -1,7 +1,7 @@
 import numpy as np
 from getNeighbour import *
 
-#######################################################################################
+
 def order2D(config):
     """
     Description:
@@ -15,10 +15,10 @@ def order2D(config):
     -> N:          List of possible number of neighbours                    array(1, 4)
     -> P:          The probability distribution of the order parameter      array(1, 4)
     """
-    size = config.shape[0]            # Dimension of the alloy matrix
-    Z = 4                             # Number of the neighbours
+    size = config.shape[0]            # Scale of the alloy matrix
+    Z = 4                             # Number of the nearest neighbours
     N = np.linspace(0, Z, Z+1)        # List of possible number of neighbours
-    P = np.zeros(5)            # Probability distribution
+    P = np.zeros(5)                   # Probability distribution
 
     # Count the number of each order paramenter
     for x in np.arange(config.shape[0]):
@@ -37,3 +37,5 @@ def order2D(config):
     
 
     return N, P
+
+

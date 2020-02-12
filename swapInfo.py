@@ -1,9 +1,11 @@
 import numpy as np
 from scipy import constants
 from getNeighbour import *
-#######################################################################################
 
+
+# Globle scientific constant
 k_B = constants.value(u'Boltzmann constant in eV/K')
+
 
 def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
     """
@@ -20,7 +22,6 @@ def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
                     0: Left; 1: Right; 2: Top; 3: Bottom             int
     -> config:      The configuration of alloy atoms                 array(size, size)                
     -> natoms:      Number of atoms                                  int
-    -> Ematrix:     The 2x2 matrix of bond energies                  array(2, 2)
     -> size:        Dimension of the matrix                          int
     -> T:           Temperature in Klevin                            float
 
@@ -54,7 +55,7 @@ def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
         dE -= int(config[ixb][iyb] + config[pair[0]][pair[1]] == 1) * Eam
         dE += int(config[ixa][iya] + config[pair[0]][pair[1]] == 1) * Eam
     
-    # Ckech if the energy decreases
+    # Ckech if the energy decreases following the transition probability rule
     if dE <= 0:
         config[ixa][iya], config[ixb][iyb] = config[ixb][iyb], config[ixa][iya]
 
@@ -63,6 +64,7 @@ def swapInfo(ixa, iya, dab, natoms, config, size, Eam, T):
 
     else:
         dE = 0
+
 
     return ixb, iyb, dE
 
