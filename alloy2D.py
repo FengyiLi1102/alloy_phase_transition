@@ -59,7 +59,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
     step = 0                # The initial step for energy record
     Etable = []             # Record the energy per 1000 step
     natoms = size**2        # Number of total atoms
-    step_interval = 10
+    step_interval = 1000
 
     # Calculate the initial energy
     for x in np.arange(config.shape[0]):
@@ -115,7 +115,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
     if T in T_figure:
         # Plot the configuration
         # Put extra zeros around border so pcolor works properly.
-        config_plot = np.zeros((size+1, size+1))
+        config_plot = np.zeros((size, size))
         config_plot[0:size, 0:size] = config
         fig = plt.figure(dpi=300)
         ax = fig.add_subplot(111)

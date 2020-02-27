@@ -41,9 +41,9 @@ def main():
 
     """
     # Define the simulation parameters
-    size = 60                                
-    nEquil = 200000
-    nSweeps = 300000
+    size = 40                                
+    nEquil = 2000000
+    nSweeps = 3000000
     fAlloy_list = [0.5, 0.4, 0.3, 0.2, 0.1]
     T_downlim = 300
     T_uplim = 5300
@@ -56,7 +56,7 @@ def main():
 
     
     # Open file to save the statistics
-    file = open ("stats.csv", "w")
+    file = open("stats.csv", "w")
     file.write('Job number, Alloy fraction, Temperature (K), Unlike bond energy (eV), Average number of unlike neighbours, Average energy (eV), Heat capacity (kB)\n')
     
     # Loop over values
@@ -163,6 +163,9 @@ def main():
             fig.savefig(r'E:\Coding\alloy_phase_transition\Order_C\{}_{}---Order_C.png'.format(fAlloy, Eam))
             plt.close(fig)
             gc.collect()
+
+
+            
 
 
     # Close the file
