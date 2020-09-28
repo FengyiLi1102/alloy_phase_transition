@@ -41,9 +41,9 @@ def main():
 
     """
     # Define the simulation parameters
-    size = 40                                
-    nEquil = 2000000
-    nSweeps = 3000000
+    size = 30                                
+    nEquil = 4000000
+    nSweeps = 4500000
     fAlloy_list = [0.5, 0.4, 0.3, 0.2, 0.1]
     T_downlim = 300
     T_uplim = 5300
@@ -106,7 +106,7 @@ def main():
             ax.yaxis.major.formatter._useMathText = True
             ax.yaxis.get_offset_text().set_fontsize(15)
             ax.get_yaxis().get_major_formatter().set_useOffset(True)
-            fig.savefig(r'E:\Coding\alloy_phase_transition\C\{}---T_C.png'.format(name))
+            fig.savefig(r'C\{}---T_C.png'.format(name))
             plt.close(fig)
             gc.collect()
 
@@ -116,7 +116,7 @@ def main():
             ax.set_title("Variation of the average order parameter against to the temperature")
             ax.set_xlabel("Temperature (K)")
             ax.set_ylabel("Order parameter (unit)")
-            fig.savefig(r'E:\Coding\alloy_phase_transition\T_order\{}---T_order.png'.format(name))
+            fig.savefig(r'T_order\{}---T_order.png'.format(name))
             plt.close(fig)
             gc.collect()
 
@@ -130,7 +130,7 @@ def main():
                
             ax.legend(loc=0) 
             ax.set_title ("Energy change under different temperatures")
-            ax.set_xlabel("Time step / 10")
+            ax.set_xlabel("Time step / {}".format(step_interval))
             ax.set_ylabel("Energy (eV)")
             ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
             ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
@@ -140,7 +140,7 @@ def main():
             ax.yaxis.major.formatter._useMathText = True
             ax.get_xaxis().get_major_formatter().set_useOffset(True)
             ax.get_yaxis().get_major_formatter().set_useOffset(True)
-            fig.savefig(r'E:\Coding\alloy_phase_transition\Energy\{}---energy.png'.format(name))
+            fig.savefig(r'Energy\{}---energy.png'.format(name))
             plt.close(fig)
             gc.collect()
 
@@ -160,12 +160,9 @@ def main():
             ax2.scatter(T_list, orders, color=color, marker='x')
 
             fig.tight_layout()  # otherwise the right y-label is slightly clipped
-            fig.savefig(r'E:\Coding\alloy_phase_transition\Order_C\{}_{}---Order_C.png'.format(fAlloy, Eam))
+            fig.savefig(r'Order_C\{}_{}---Order_C.png'.format(fAlloy, Eam))
             plt.close(fig)
             gc.collect()
-
-
-            
 
 
     # Close the file

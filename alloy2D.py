@@ -115,7 +115,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
     if T in T_figure:
         # Plot the configuration
         # Put extra zeros around border so pcolor works properly.
-        config_plot = np.zeros((size, size))
+        config_plot = np.zeros((size+1, size+1))
         config_plot[0:size, 0:size] = config
         fig = plt.figure(dpi=300)
         ax = fig.add_subplot(111)
@@ -123,7 +123,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
         ax.set_title("Schematic configuration of the alloy")
         ax.set_xlabel("X axis boundary")
         ax.set_ylabel("Y axis boundary")
-        fig.savefig(r'E:\Coding\alloy_phase_transition\Config\{}---config.png'.format(job))
+        fig.savefig(r'Config\{}---config.png'.format(job))
         plt.close(fig)
         gc.collect()
         
@@ -143,7 +143,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
         ax.get_xaxis().get_major_formatter().set_useOffset(True)
         ax.yaxis.get_offset_text().set_fontsize(15)
         ax.get_yaxis().get_major_formatter().set_useOffset(True)
-        fig.savefig(r'E:\Coding\alloy_phase_transition\Energy\{}---energy.png'.format(job))
+        fig.savefig(r'Energy\{}---energy.png'.format(job))
         plt.close(fig)
         gc.collect()
 
@@ -159,7 +159,7 @@ def alloy2D(size, fAlloy, nSweeps, nEquil, T, Eam, job, T_list):
         ax.set_xlabel("Number of unlike neighbours")
         ax.set_ylabel("Probability")
         ax.legend(loc=0)
-        fig.savefig(r'E:\Coding\alloy_phase_transition\order\{}-order.png'.format(job))
+        fig.savefig(r'order\{}-order.png'.format(job))
         plt.close(fig)
         gc.collect()
     
